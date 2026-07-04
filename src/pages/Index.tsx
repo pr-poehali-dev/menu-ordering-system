@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import AuthDialog from '@/components/AuthDialog';
 import { api, loadUser, clearUser, User } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
+import { QRCodeSVG } from 'qrcode.react';
 
 type Dish = { id: string; name: string; desc: string; price: number; cat: string; tag?: string };
 type Place = { id: string; name: string; kind: string; city: string; accent: string; img: string; menu: Dish[] };
@@ -118,8 +119,8 @@ const Index = () => {
       <header className="sticky top-0 z-40 backdrop-blur-md bg-background/70 border-b border-border">
         <div className="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
           <button onClick={() => { setPlace(null); setCart({}); }} className="flex items-center gap-2">
-            <span className="w-9 h-9 rounded-full bg-primary text-primary-foreground grid place-items-center font-display text-xl">В</span>
-            <span className="font-display text-2xl font-semibold tracking-tight">Вкусно<span className="text-primary">.Здесь</span></span>
+            <span className="w-9 h-9 rounded-full bg-primary text-primary-foreground grid place-items-center font-display text-xl">Н</span>
+            <span className="font-display text-2xl font-semibold tracking-tight">Никитовский<span className="text-primary"> кофейни</span></span>
           </button>
           <div className="flex items-center gap-2">
             {user?.role === 'admin' && (
@@ -260,7 +261,7 @@ const Index = () => {
       <footer className="border-t border-border bg-secondary text-secondary-foreground">
         <div className="max-w-6xl mx-auto px-5 py-10 flex flex-col md:flex-row justify-between gap-6">
           <div>
-            <span className="font-display text-3xl font-semibold">Вкусно.Здесь</span>
+            <span className="font-display text-3xl font-semibold">Никитовский кофейни</span>
             <p className="opacity-80 text-sm mt-2 max-w-xs">Платформа заведений с меню, онлайн-заказами и картами лояльности.</p>
           </div>
           <div className="flex gap-8 text-sm opacity-90">
@@ -279,8 +280,15 @@ const Index = () => {
               <Icon name="Check" size={32} />
             </div>
             <h2 className="font-display text-3xl font-semibold">Заказ принят!</h2>
-            <p className="text-muted-foreground mt-1">Назовите номер на кассе</p>
-            <div className="my-6 font-display text-6xl font-semibold text-primary tracking-widest">{placedOrder?.order_number}</div>
+            <p className="text-muted-foreground mt-1">Покажите QR или назовите номер на кассе</p>
+            <div className="my-5 font-display text-6xl font-semibold text-primary tracking-widest">{placedOrder?.order_number}</div>
+            {placedOrder && (
+              <div className="flex justify-center mb-5">
+                <div className="p-3 bg-white rounded-2xl border border-border">
+                  <QRCodeSVG value={`ORDER:${placedOrder.order_number}`} size={140} fgColor="hsl(20, 30%, 12%)" />
+                </div>
+              </div>
+            )}
             <div className="flex justify-center gap-6 text-sm">
               <div><span className="text-muted-foreground">Сумма</span><p className="font-semibold text-lg">{placedOrder?.total} ₽</p></div>
               <div><span className="text-muted-foreground">Баллы</span><p className="font-semibold text-lg text-accent">+{placedOrder?.points_earned}</p></div>
@@ -292,11 +300,18 @@ const Index = () => {
 
       <Dialog open={cabinetOpen} onOpenChange={setCabinetOpen}>
         <DialogContent className="rounded-3xl max-w-lg">
-          <DialogHeader><DialogTitle className="font-display text-3xl">Мои заказы</DialogTitle></DialogHeader>
-          <div className="flex items-center gap-2 bg-muted rounded-2xl p-4 mb-2">
-            <Icon name="Sparkles" size={24} className="text-accent" />
-            <div><p className="text-sm text-muted-foreground">Баланс баллов</p><p className="font-display text-2xl font-semibold">{user?.points} ₽</p></div>
+          <DialogHeader><DialogTitle className="font-display text-3xl">Моя карта лояльности</DialogTitle></DialogHeader>
+          <div className="flex items-center gap-4 bg-secondary text-secondary-foreground rounded-2xl p-5 mb-2">
+            <div className="p-2 bg-white rounded-xl shrink-0">
+              <QRCodeSVG value={`CARD:${user?.id}`} size={84} fgColor="hsl(152, 42%, 20%)" />
+            </div>
+            <div>
+              <p className="text-sm opacity-80 flex items-center gap-1"><Icon name="Sparkles" size={16} /> Баланс баллов</p>
+              <p className="font-display text-3xl font-semibold">{user?.points} <span className="text-base font-normal opacity-80">₽</span></p>
+              <p className="text-xs opacity-70 mt-1">{user?.name} · 1 балл = 1 ₽</p>
+            </div>
           </div>
+          <p className="font-semibold text-sm mt-2 mb-1">История заказов</p>
           <div className="space-y-2 max-h-80 overflow-auto">
             {myOrders.length === 0 ? <p className="text-muted-foreground text-center py-6">Заказов пока нет</p> : myOrders.map((o) => (
               <div key={o.order_number} className="flex justify-between items-center border border-border rounded-2xl p-3">
