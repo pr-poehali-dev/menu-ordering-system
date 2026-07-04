@@ -1,0 +1,27 @@
+{
+  "tests": [
+    {
+      "name": "CORS preflight",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Unknown action",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 400,
+      "expectedBody": {"error": "string"},
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Login admin NIKITOVSKIY",
+      "method": "POST",
+      "path": "/?action=login",
+      "body": {"phone": "НИКИТОВСКИЙ", "password": "НИКИТОВСКИЙ"},
+      "expectedStatus": 200,
+      "expectedBody": {"user": {"role": "admin"}},
+      "bodyMatcher": "partial"
+    }
+  ]
+}
